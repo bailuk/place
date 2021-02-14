@@ -30,6 +30,12 @@ try {
         }
     }
 
+    // convert ids from string to integer
+    $count = count($result);
+    for ($i =  0; $i < $count; $i++) {
+        $result[$i]['id']=intval($result[$i]['id']);
+    }
+    
     header("content-Type: application/json; charset=utf-8'");
     echo json_encode($result);
 

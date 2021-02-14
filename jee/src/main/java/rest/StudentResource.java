@@ -1,6 +1,6 @@
 package rest;
 
-import entity.City;
+import entity.Student;
 
 import org.jboss.logging.Logger;
 import javax.inject.Inject;
@@ -19,8 +19,8 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 
-@Path("city")
-public class CityResource {
+@Path("student")
+public class StudentResource {
 
     @PersistenceContext(unitName = "PlacePU")
     private EntityManager em;
@@ -30,28 +30,20 @@ public class CityResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response get (
         @QueryParam("id")   @DefaultValue("") String id,
-        @QueryParam("plz")  @DefaultValue("") String plz,
-        @QueryParam("name") @DefaultValue("") String name,
-        @QueryParam("city") @DefaultValue("") String city
+        @QueryParam("name") @DefaultValue("") String name
     ) {
 
         try {
-            List<City> result;
+            List<Student> result;
 
             if (! "".equals(id)) {
-                result = em.createNamedQuery("City.findById", City.class).setParameter("id", Integer.valueOf(id)).getResultList();
+                result = em.createNamedQuery("Student.findById", Student.class).setParameter("id", Integer.valueOf(id)).getResultList();
                 
-            } else if (! "".equals(plz)) {
-                result = em.createNamedQuery("City.findByPlz", City.class).setParameter("plz", plz).getResultList();
-
             } else if (! "".equals(name) ) {
-                result = em.createNamedQuery("City.findByName", City.class).setParameter("name", "%" + name + "%").getResultList();    
-
-            } else if (! "".equals(city) ) {
-                result = em.createNamedQuery("City.findByCity", City.class).setParameter("city", city).getResultList();
+                result = em.createNamedQuery("Student.findByName", Student.class).setParameter("name", "%" + name + "%").getResultList();    
 
             } else {
-                result = em.createNamedQuery("City.findAll", City.class).getResultList();
+                result = em.createNamedQuery("Student.findAll", Student.class).getResultList();
 
             }
             return Response.ok(result).build();

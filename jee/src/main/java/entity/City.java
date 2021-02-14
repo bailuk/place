@@ -11,7 +11,10 @@ import javax.persistence.Table;
 @Table(name = "city")
 @NamedQueries({
     @NamedQuery(name="City.findById", query="SELECT c FROM City c WHERE c.id = :id"),
-    @NamedQuery(name="City.findAll", query="SELECT c FROM City c")
+    @NamedQuery(name="City.findAll", query="SELECT c FROM City c"),
+    @NamedQuery(name="City.findByPlz", query="SELECT c FROM City c WHERE c.plz = :plz"),
+    @NamedQuery(name="City.findByCity", query="SELECT c FROM City c WHERE c.city = :city"),
+    @NamedQuery(name="City.findByName", query="SELECT c FROM City c WHERE c.city LIKE :name")
 })
 public class City {
 
