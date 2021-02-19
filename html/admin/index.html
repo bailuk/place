@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Happy Place</title>
+</head>
+<body>
+    <h1>Students</h1>
+    <div class="container">
+        
+    </div>
+
+    <form action="">
+        <label for="add_name">Name</label>
+        <input type="text" name="name" id="add_name">
+        
+        <label for="add_plz">Plz</label>
+        <input type="text" name="plz" id="add_plz">
+
+        <input type="button" value="Add student" onclick="addStudent()">
+    </form>
+
+    <script>
+
+        var toEdit=-1;
+
+        function addStudent() {
+            let plz = document.getElementById('add_plz').value;
+            let name = document.getElementById('add_name').value;
+            
+
+            const response = fetch(`http://localhost/php/place/php/rest/city/?plz=${plz}`);
+
+            response
+                .then(response /*parameter*/ => response.json() /*body*/ )
+                .then(json /*parameter*/ => { // body
+                    id_city = json[0].id;
+
+                    r = fetch(`http://localhost/php/place/php/rest/student/`, { 
+                        method: 'POST',
+                        body: JSON.stringify({name: name, id_city: id_city})
+                    } ).then( () => { loadStudents() } );
+                    
+                });
+        }
+
+        function updateStudent(id) {
+            let plz = document.getElementById('update_plz').value;
+            let name = document.getElementById('update_name').value;
+            
+            const response = fetch(`http://localhost/php/place/php/rest/city/?plz=${plz}`);
+
+            response
+                .then(response /*parameter*/ => response.json() /*body*/ )
+                .then(json /*parameter*/ => { // body
+                    id_city = json[0].id;
+
+                    r = fetch(`http://localhost/php/place/php/rest/student/?id=${id}`, { 
+                        method: 'PUT',
+                        body: JSON.stringify({name: name, id_city: id_city})
+                    } ).then( () => { 
+                            toEdit=-1; 
+                        loadStudents();
+                     } );
+                    
+                });
+        }
+
+
+        /*
+        async function test1(param1) {
+            const response = await fetch('http://localhost/php/place/php/rest/student/')
+            const obj = await response.json()
+
+        }
+
+        const test2 = param1 => {}
+        // GET Request.
+        */
+
+        function deleteStudent(id) {
+            console.log(id); 
+            response = fetch(`http://localhost/php/place/php/rest/student/?id=${id}`, { method: 'DELETE'} )
+                .then(() => {
+                    loadStudents()
+                });
+        }
+
+
+        function editStudent(id) {
+            toEdit=id;
+            loadStudents();
+        }
+
+
+        function loadStudents() {
+            const response = fetch('http://localhost/php/place/php/rest/student/')
+            response.then(response /*parameter*/ => response.json() /*body*/ )
+                .then(json /*parameter*/ => { // body
+                    let html = '<table>';
+                
+                    json.forEach(student => {
+                        hans = student.name;
+
+                        if (student.id == toEdit) {
+                            html += `<form action="">
+                                    <tr>
+                                    <td><input type="text" name="name" id="update_name" value=${student.name}></td>
+                                    <td><input type="text" name="plz" id="update_plz" value=${student.plz}></td>
+                                    <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
+                                    </tr></form>`;
+                        } else {
+                            html += `<tr>
+                                    <td>${student.name}</td>
+                                    <td>${student.plz}</td>
+                                    <td>${student.city}</td>
+                                    <td><button onClick="deleteStudent(`+ student.id + `)">remove</button></td>
+                                    <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>
+                                </tr>`;
+                        }
+                   
+                    });
+                    html += "</table>";
+                    let container = document.querySelector('.container');
+                    container.innerHTML = html;
+                })
+                .catch(err => console.log('Request Failed', err)); // Catch errors
+        }
+
+        loadStudents();
+        
+    </script>
+
+</body>
+</html>

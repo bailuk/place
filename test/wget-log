@@ -1,0 +1,11 @@
+--2021-02-19 15:49:58--  https://nominatim.openstreetmap.org/ui/search.html?city=truttikon
+Auflösen des Hostnamens nominatim.openstreetmap.org (nominatim.openstreetmap.org)… 130.117.76.9, 2001:978:2:2c::172:9
+Verbindungsaufbau zu nominatim.openstreetmap.org (nominatim.openstreetmap.org)|130.117.76.9|:443 … verbunden.
+HTTP-Anforderung gesendet, auf Antwort wird gewartet … 200 OK
+Länge: 564 [text/html]
+Wird in »search.html?city=truttikon« gespeichert.
+
+search.html?city=truttikon                     0%[                                                                                               ]       0  --.-KB/s               search.html?city=truttikon                   100%[==============================================================================================>]     564  --.-KB/s    in 0s      
+
+2021-02-19 15:49:58 (25.8 MB/s) - »search.html?city=truttikon« gespeichert [564/564]
+

@@ -1,0 +1,21 @@
+{
+"type":"FeatureCollection",
+"licence":"Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+"features":[
+    {"type":"Feature","properties":
+        {"place_id":258971411,
+        "osm_type":"relation",
+        "osm_id":1682217,
+        "display_name":"Truttikon, Bezirk Andelfingen, Zürich, 8467, Schweiz/Suisse/Svizzera/Svizra",
+        "place_rank":16,
+        "category":"boundary",
+        "type":"administrative",
+        "importance":0.47929955508049127,
+        "icon":"https://nominatim.openstreetmap.org/ui/mapicons//poi_boundary_administrative.p.20.png"},
+        "bbox":[8.7111742,47.6216591,8.7475061,47.6430587],
+        "geometry":{
+            "type":"Point","coordinates":[8.7276879,47.6296056]
+        }
+    }
+]
+}

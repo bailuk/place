@@ -1,53 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Happy Place</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <title>Happy Place</title>
+    <style>
+        #mapid {
+            height: 800px;
+            width: 800px;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Students</h1>
-</body>
-</html>
-    <div class="container">
-        
-    </div>
+    <a href="html/admin/">Administrator</a>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    
+
+    <div id="mapid"></div>
 
     <script>
-        /*
-        async function test1(param1) {
-            const response = await fetch('http://localhost/php/place/php/rest/student/')
-            const obj = await response.json()
+        var map = L.map('mapid').setView([51.505, -0.09], 13);
 
-        }
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-        const test2 = param1 => {}
-        // GET Request.
-        */
 
-        function deleteStudent(name) {
-            alert("delete " + name);
-        }
 
-        const response = fetch('http://localhost/php/place/php/rest/student/')
-        response.then(response /*parameter*/ => response.json() /*body*/ )
-            .then(json /*parameter*/ => { // body
-                let html = '<table>';
+        function loadStudents() {
+            const response = fetch('http://localhost/php/place/php/rest/student/')
+            response.then(response /*parameter*/ => response.json() /*body*/ )
+                .then(json /*parameter*/ => { // body
                 
-                json.forEach(student => {
-                    html += `<tr>
-                                <td>${student.name}</td>
-                                <td>${student.plz}</td>
-                                <td>${student.city}</td>
-                                <td><button onClick="deleteStudent('hans')">remove</button></td>
-                            </tr>`;
-                   
-                });
-                html += "</table>";
-                let container = document.querySelector('.container');
-                container.innerHTML = html;
-            })
-            .catch(err => console.log('Request Failed', err)); // Catch errors
+                    json.forEach(student => {
 
-</script>
+                        const r = fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
+                            .then(response => response.json() )
+                            .then(json => {
+
+                                lat=json.features[0].geometry.coordinates[1];
+                                lon=json.features[0].geometry.coordinates[0];
+
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(student.name)
+                                    .openPopup();
+
+                            })
+                        }
+                   
+                    )
+                })
+                .catch(err => console.log('Request Failed', err)); // Catch errors
+        }
+
+
+        loadStudents();
+    </script>
+
+
+
+</body>
+
+</html>
