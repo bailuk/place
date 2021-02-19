@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Happy Place</title>
+</head>
+<body>
+    <h1>Students</h1>
+</body>
+</html>
+    <div class="container">
+        
+    </div>
+
+    <script>
+        /*
+        async function test1(param1) {
+            const response = await fetch('http://localhost/php/place/php/rest/student/')
+            const obj = await response.json()
+
+        }
+
+        const test2 = param1 => {}
+        // GET Request.
+        */
+
+        function deleteStudent(name) {
+            alert("delete " + name);
+        }
+
+        const response = fetch('http://localhost/php/place/php/rest/student/')
+        response.then(response /*parameter*/ => response.json() /*body*/ )
+            .then(json /*parameter*/ => { // body
+                let html = '<table>';
+                
+                json.forEach(student => {
+                    html += `<tr>
+                                <td>${student.name}</td>
+                                <td>${student.plz}</td>
+                                <td>${student.city}</td>
+                                <td><button onClick="deleteStudent('hans')">remove</button></td>
+                            </tr>`;
+                   
+                });
+                html += "</table>";
+                let container = document.querySelector('.container');
+                container.innerHTML = html;
+            })
+            .catch(err => console.log('Request Failed', err)); // Catch errors
+
+</script>
