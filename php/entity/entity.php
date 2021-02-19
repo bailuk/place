@@ -43,9 +43,9 @@ class Entity
 
 
     public function update($id, $entity) {
-        $sql = "UPDATE " . $this->table . " SET " . implode(" = ?, ", array_keys($entity)) . " = ? WHERE id = :$id ;";
+        $sql = "UPDATE " . $this->table . " SET " . implode(" = ?, ", array_keys($entity)) . " = ? WHERE id = ? ;";
         $statement = $this->connection->prepare($sql);
-        $statement->bindParam(':id', $id);
+        $statement->bindParam(count($entity)+1, $id);
         $this->bindValues($statement, $entity);
         return $statement->execute();
     }

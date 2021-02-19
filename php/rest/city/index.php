@@ -2,7 +2,7 @@
 
 require_once('../../db/connect.php');
 require_once('../../entity/entity.php');
-require_once('../../util/error.php');
+require_once('../../util/util.php');
 
 try {
 
@@ -26,14 +26,11 @@ try {
             $result = $entity->fetch($what);
         }
 
-        // convert ids from string to integer
-        $count = count($result);
-        for ($i =  0; $i < $count; $i++) {
-            $result[$i]['id'] = intval($result[$i]['id']);
-        }
+        convertToInteger($result, array('id'));
 
         header("content-Type: application/json; charset=utf-8'");
         echo json_encode($result);
+
     }
 } catch (Exception $e) {
     exitError($e);

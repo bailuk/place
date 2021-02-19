@@ -2,7 +2,7 @@
 
 require_once('../../db/connect.php');
 require_once('../../entity/entity.php');
-require_once('../../util/error.php');
+require_once('../../util/util.php');
 
 try {
     $method = $_SERVER['REQUEST_METHOD'];
@@ -17,27 +17,32 @@ try {
         } else {
             $result = $entity->fetch($what, $join);
         }
-
-
-        // convert ids from string to integer
-        $count = count($result);
-        for ($i =  0; $i < $count; $i++) {
-            $result[$i]['id'] = intval($result[$i]['id']);
-            $result[$i]['id_city'] = intval($result[$i]['id_city']);
-        }
-
+        convertToInteger($result, array('id', 'id_city'));
 
         header("content-Type: application/json; charset=utf-8'");
         echo json_encode($result);
+
     } else if ($method == 'POST') {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         $entity->create(array('name' => $input['name'], 'id_city' => $input['id_city']));
         header('HTTP/1.1 201 Created');
 
     } else if ($method == 'PUT') {
-        echo "updateUser";
+        if (isset($_GET['id'])) {
+            $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+            $entity->update($_GET['id'], array('name' => $input['name'], 'id_city' => $input['id_city']));
+        } else {
+            throw new \Exception('Missing parameter: id');
+        }
+
     } else if ($method == 'DELETE') {
-        echo "deleteUser";
+        if (isset($_GET['id'])) {
+            $entity->delete($_GET['id']);
+        } else {
+            throw new \Exception('Missing parameter: id');
+        }
+
+        // TODO: throw missing parameter error
     }
 } catch (Exception $e) {
     exitError($e);
