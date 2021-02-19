@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
@@ -53,4 +55,25 @@ public class StudentResource {
             
         }
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response create (Student student) {
+        em.persist(student);
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update (Student student, @QueryParam("id") Integer id) {
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response delete (Student student, @QueryParam("id") Integer id) {
+        return Response.status(Response.Status.BAD_REQUEST).build();        
+    }
+
 }
