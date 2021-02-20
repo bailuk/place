@@ -24,50 +24,112 @@
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
 
-    
+
 
     <div id="mapid"></div>
+    <button onclick="frameStudents()">Frame map</button>
 
+    <script src="html/js/config.js"></script>
     <script>
-        var map = L.map('mapid').setView([51.505, -0.09], 13);
+        let map = L.map('mapid');
+
+
+        let options = L.Icon.Default.prototype.options;
+        let myIcon = L.icon({
+            iconUrl: 'html/images/marker-icon-green.png',
+            iconSize: options.iconSize,
+            iconAnchor: options.iconAnchor,
+            popupAnchor: options.popupAnchor,
+            shadowUrl: 'html/images/marker-shadow.png',
+            shadowSize: options.shadowSize,
+            shadowAnchor: options.shadowAnchor
+            });
+
+
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
 
+        let west = 8.721067;
+        let east = 8.733311;
+        let north = 47.633246;
+        let south = 47.625047;
+        frameStudents();
+
+
+        function frameStudents() {
+            map.fitBounds([[south, west], [north, east]]);
+        }
+
+        function frameStudent(lat, lon) {
+            if (lon < west) {
+                west = lon;
+            } else if (lon > east) {
+                east = lon;
+            }
+
+            if (lat > north) {
+                north = lat;
+            } else  if (lat < south) {
+                south = lat;
+            }
+
+            frameStudents();
+        }
+
+
+        function addStudent(lat, lon, student) {
+            L.marker([lat, lon], {icon: myIcon}).addTo(map)
+                    .bindPopup(student.name)
+                    .openPopup();
+
+            frameStudent(lat, lon);    
+        }
+
+
+        function loadCoordinates(student) {
+            fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
+                .then(response => response.json())
+                .then(json => {
+                    let lat = json.features[0].geometry.coordinates[1];
+                    let lon = json.features[0].geometry.coordinates[0];
+
+                    localStorage.setItem(`${student.id_city}_lat`, lat);
+                    localStorage.setItem(`${student.id_city}_lon`, lon);
+
+                    addStudent(lat, lon, student);
+
+                })
+                .catch(err => console.log('Request Failed', err));
+
+        }
 
         function loadStudents() {
-            const response = fetch('http://localhost/php/place/php/rest/student/')
-            response.then(response /*parameter*/ => response.json() /*body*/ )
-                .then(json /*parameter*/ => { // body
-                
+            fetch(`${baseUrl}/student/`)
+                .then(response => response.json())
+                .then(json => {
+
                     json.forEach(student => {
 
-                        const r = fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
-                            .then(response => response.json() )
-                            .then(json => {
+                        let lat = parseFloat(localStorage.getItem(`${student.id_city}_lat`));
+                        let lon = parseFloat(localStorage.getItem(`${student.id_city}_lon`));
 
-                                lat=json.features[0].geometry.coordinates[1];
-                                lon=json.features[0].geometry.coordinates[0];
+                        if (isNaN(lat) || isNaN(lon)) {
+                            loadCoordinates(student);
 
-                                L.marker([lat, lon]).addTo(map)
-                                    .bindPopup(student.name)
-                                    .openPopup();
-
-                            })
+                        } else {
+                            addStudent(lat, lon, student);
                         }
-                   
-                    )
+                    })
                 })
-                .catch(err => console.log('Request Failed', err)); // Catch errors
+                .catch(err => console.log('Request Failed', err));
         }
 
 
         loadStudents();
     </script>
-
-
 
 </body>
 

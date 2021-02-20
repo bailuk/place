@@ -1,7 +1,7 @@
 <?php
 
 function connect() {
-    $host = 'mariadb';
+    $host = '127.0.0.1';
     $database = 'place';
     $user = 'root';
     $password = '123';
