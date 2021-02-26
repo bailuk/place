@@ -57,7 +57,7 @@ public class CityResource {
             return Response.ok(result).build();
 
         } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.toString()).build();
             
         }
     }

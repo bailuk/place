@@ -6,6 +6,11 @@ require_once('../../util/util.php');
 
 try {
 
+    session_start();
+    
+    throwOnInvalidSession();
+
+    
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method == 'GET') {

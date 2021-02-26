@@ -148,6 +148,7 @@
         function getMarkerRadioButtons(selected) {
             result="";
             index=0;
+            selected = getSaveMarker(selected);
             markers.forEach(marker => {
                 console.log(selected);
                 console.log(index);

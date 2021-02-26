@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Happy Place</title>
+</head>
+<body>
+
+    <a href="../../">Karte</a>
+    <a href="../admin">Admin</a>
+    <div class="status"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+
+
+    <script src="../js/config.js"></script>
+    <script>
+
+        
+
+    function initSession() {
+        r = fetch(`${baseUrl}/auth/`).then(response => response.json()).then(json => { 
+
+            if (json.auth) {
+                html = `<div>you are logged in as ${json.name} <button onclick="logout()">Logout</button></div>`;
+
+                /// session code here
+            } else if (json.auth && json.admin) {
+                html = `<div>you are logged in with admin rights as ${json.name}<button onclick="logout()">Logout</button></div>`;
+
+                /// session code here
+            } else {
+                html = `<div>
+                        <label for="name">Login name</label><input type="text" name="name" id="name">
+                        <label for="password">Passwort</label><input type="password" name="password" id="password">
+                        <button onclick="login()">Login</button>
+                        </div>`;
+            }
+            document.querySelector('.status').innerHTML = html;
+        });
+
+    }
+
+
+   
+    function login() {
+        let name = document.getElementById('name').value;
+        let password = document.getElementById('password').value;
+
+        console.log(name);
+        console.log(password);
+        r = fetch(`${baseUrl}/auth/`, { 
+                    method: 'POST',
+                    body: JSON.stringify({name: name, password: password})
+                } ).then( () => { 
+                    initSession();
+                } );
+    }
+
+    function logout() {
+        r = fetch(`${baseUrl}/auth/?logout=true`, { 
+                    method: 'POST'
+                } ).then( () => { 
+                    initSession();
+                } );
+    }
+
+
+    initSession();
+
+    </script>
+</body>
+</html>

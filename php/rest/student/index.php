@@ -5,6 +5,12 @@ require_once('../../entity/entity.php');
 require_once('../../util/util.php');
 
 try {
+
+    session_start();
+
+    throwOnInvalidSession();
+
+
     $method = $_SERVER['REQUEST_METHOD'];
     $entity = new Entity(connect(), 'student');
 
@@ -23,11 +29,15 @@ try {
         echo json_encode($result);
 
     } else if ($method == 'POST') {
+        throwOnNonAdminSession();
+
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         $entity->create(array('name' => $input['name'], 'id_city' => $input['id_city'], 'marker' => $input['marker']));
         header('HTTP/1.1 201 Created');
 
     } else if ($method == 'PUT') {
+        throwOnNonAdminSession();
+
         if (isset($_GET['id'])) {
             $input = (array) json_decode(file_get_contents('php://input'), TRUE);
             $entity->update($_GET['id'], array('name' => $input['name'], 'id_city' => $input['id_city'], 'marker' => $input['marker']));
@@ -36,6 +46,8 @@ try {
         }
 
     } else if ($method == 'DELETE') {
+        throwOnNonAdminSession();
+        
         if (isset($_GET['id'])) {
             $entity->delete($_GET['id']);
         } else {
