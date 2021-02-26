@@ -9,65 +9,112 @@
 <body>
     <a href="../../">Karte</a>
     <h1>Students</h1>
-    <div class="container">
-        
+    <div class="container"></div>
+ 
+    <div class="add_student"></div>
+ 
+    
+    <h2>Ort Suchen</h2>
+    <div class="searchCity">
+        <label for="search">Ort suchen</label>
+        <input type="text" name="search" id="search" onkeyup="updateCityList()">
+        <div class="cityList"></div>
     </div>
 
-    <form action="">
-        <label for="add_name">Name</label>
-        <input type="text" name="name" id="add_name">
-        
-        <label for="add_plz">Plz</label>
-        <input type="text" name="plz" id="add_plz">
-
-        <input type="button" value="Add student" onclick="addStudent()">
-    </form>
 
     <script src="../js/config.js"></script>
     <script>
 
         let toEdit=-1;
+        let id_city=-1;
 
-        function addStudent() {
-            let plz = document.getElementById('add_plz').value;
-            let name = document.getElementById('add_name').value;
-            
 
-            const response = fetch(`${baseUrl}/city/?plz=${plz}`);
+        function updateCityList() {
+            search = document.getElementById("search").value;
+            const response = fetch(`${baseUrl}/city/?name=${search}`);
 
             response
-                .then(response /*parameter*/ => response.json() /*body*/ )
-                .then(json /*parameter*/ => { // body
-                    id_city = json[0].id;
-
-                    r = fetch(`${baseUrl}/student/`, { 
-                        method: 'POST',
-                        body: JSON.stringify({name: name, id_city: id_city})
-                    } ).then( () => { loadStudents() } );
+                .then(response => response.json())
+                .then(json => { 
+                    let html = '<table>';
+                
+                    json.forEach(city => {
                     
+                        html += `<tr>
+                                <td>${city.plz}</td>
+                                <td>${city.city}</td>
+                                <td><button onClick="useCity('${city.id}', '${city.plz}', '${city.city}')">übernehmen</button></td>
+                            </tr>`;
+                    })
+              
+                    html += "</table>";
+                    let container = document.querySelector('.cityList');
+                    container.innerHTML = html;                    
+                
                 });
+
+        }
+
+        function useCity(id, plz, name) {
+            id_city=id;
+            document.querySelector('.newPlz').innerHTML = plz;
+            document.querySelector('.newCity').innerHTML = name;
+        }
+
+
+        function displayAddForm() {
+            
+            if (toEdit < 0) {
+                id_city=-1;
+                html=`
+                    <h2>Schüler hinzufügen</h2>                    
+                    <label for="add_name">Name</label>
+                    <input type="text" name="name" id="add_name" class="newName">
+                    <span>Ort: </span> <span class="newPlz"></span> <span class="newCity">Bitte aus Liste auswählen</span>
+                    <button onclick="addStudent()">Hinzufügen</button>
+                    `;
+
+            } else {
+                html = '';
+            }
+            let container = document.querySelector('.add_student');
+            container.innerHTML = html;
+        }
+
+        
+
+        function addStudent() {
+            let name = document.querySelector('.newName').value;
+
+            r = fetch(`${baseUrl}/student/`, { 
+                    method: 'POST',
+                    body: JSON.stringify({name: name, id_city: id_city})
+                } ).then( () => { 
+                    loadStudents();            
+                    displayAddForm();
+                } );
+                    
+        }
+
+        function cancelUpdateStudent() {
+            toEdit=-1;
+            displayAddForm();
+            loadStudents();
         }
 
         function updateStudent(id) {
-            let plz = document.getElementById('update_plz').value;
-            let name = document.getElementById('update_name').value;
+            let name = document.querySelector('.newName').value;
             
-            const response = fetch(`${baseUrl}/city/?plz=${plz}`);
-
-            response
-                .then(response /*parameter*/ => response.json() /*body*/ )
-                .then(json /*parameter*/ => { // body
-                    id_city = json[0].id;
-
-                    r = fetch(`${baseUrl}/student/?id=${id}`, { 
-                        method: 'PUT',
-                        body: JSON.stringify({name: name, id_city: id_city})
-                    } ).then( () => { 
-                            toEdit=-1; 
-                        loadStudents();
-                     } );
-                    
-                });
+            
+            r = fetch(`${baseUrl}/student/?id=${id}`, { 
+                    method: 'PUT',
+                    body: JSON.stringify({name: name, id_city: id_city})
+                } ).then( () => { 
+                     toEdit=-1; 
+                     loadStudents();
+                     displayAddForm();
+                } );
+                   
         }
 
 
@@ -75,7 +122,8 @@
             console.log(id); 
             response = fetch(`${baseUrl}/student/?id=${id}`, { method: 'DELETE'} )
                 .then(() => {
-                    loadStudents()
+                    loadStudents();
+                    displayAddForm();        
                 });
         }
 
@@ -83,25 +131,32 @@
         function editStudent(id) {
             toEdit=id;
             loadStudents();
+            displayAddForm();
         }
 
 
         function loadStudents() {
             const response = fetch(`${baseUrl}/student/`)
-            response.then(response /*parameter*/ => response.json() /*body*/ )
-                .then(json /*parameter*/ => { // body
+            response.then(response => response.json() )
+                .then(json => { 
                     let html = '<table>';
                 
                     json.forEach(student => {
                         hans = student.name;
 
                         if (student.id == toEdit) {
+
+                            id_city = student.id_city;
+
                             html += `<form action="">
                                     <tr>
-                                    <td><input type="text" name="name" id="update_name" value=${student.name}></td>
-                                    <td><input type="text" name="plz" id="update_plz" value=${student.plz}></td>
+                                    <td><input type="text" name="name" class="newName" id="update_name" value="${student.name}""></td>
+                                    <td class="newPlz">${student.plz}</td>
+                                    <td class="newCity">${student.city}</td>
                                     <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
+                                    <td><input type="button" value="Cancel" onclick="cancelUpdateStudent()"></td>
                                     </tr></form>`;
+
                         } else {
                             html += `<tr>
                                     <td>${student.name}</td>
@@ -117,11 +172,11 @@
                     let container = document.querySelector('.container');
                     container.innerHTML = html;
                 })
-                .catch(err => console.log('Request Failed', err)); // Catch errors
+                .catch(err => console.log('Request Failed', err));
         }
 
         loadStudents();
-        
+        displayAddForm();        
     </script>
 
 </body>

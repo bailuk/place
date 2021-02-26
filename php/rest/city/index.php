@@ -21,7 +21,7 @@ try {
             $result = $entity->fetch($what, "WHERE city = ?", array($city));
         } else if (isset($_GET['name'])) {
             $city = "%$_GET[name]%";
-            $result = $entity->fetch($what, "WHERE city LIKE ?", array($city));
+            $result = $entity->fetch($what, "WHERE city LIKE ? OR plz LIKE ? ORDER BY plz LIMIT 10", array($city, $city));
         } else {
             $result = $entity->fetch($what);
         }
