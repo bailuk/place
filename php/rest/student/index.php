@@ -9,7 +9,7 @@ try {
     $entity = new Entity(connect(), 'student');
 
     if ($method == 'GET') {
-        $what = "student.id AS id, student.name AS name, city.plz AS plz, city.city AS city, city.id AS id_city";
+        $what = "student.id AS id, student.name AS name, student.marker AS marker, city.plz AS plz, city.city AS city, city.id AS id_city";
         $join = "LEFT JOIN city ON city.id = student.id_city";
 
         if (isset($_GET['id'])) {
@@ -24,13 +24,13 @@ try {
 
     } else if ($method == 'POST') {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        $entity->create(array('name' => $input['name'], 'id_city' => $input['id_city']));
+        $entity->create(array('name' => $input['name'], 'id_city' => $input['id_city'], 'marker' => $input['marker']));
         header('HTTP/1.1 201 Created');
 
     } else if ($method == 'PUT') {
         if (isset($_GET['id'])) {
             $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-            $entity->update($_GET['id'], array('name' => $input['name'], 'id_city' => $input['id_city']));
+            $entity->update($_GET['id'], array('name' => $input['name'], 'id_city' => $input['id_city'], 'marker' => $input['marker']));
         } else {
             throw new \Exception('Missing parameter: id');
         }

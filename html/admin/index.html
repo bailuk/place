@@ -21,6 +21,10 @@
         <div class="cityList"></div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
 
     <script src="../js/config.js"></script>
     <script>
@@ -66,11 +70,13 @@
             
             if (toEdit < 0) {
                 id_city=-1;
+                markerHtml = getMarkerRadioButtons();
                 html=`
                     <h2>Schüler hinzufügen</h2>                    
                     <label for="add_name">Name</label>
                     <input type="text" name="name" id="add_name" class="newName">
                     <span>Ort: </span> <span class="newPlz"></span> <span class="newCity">Bitte aus Liste auswählen</span>
+                    <span>${markerHtml}</span> 
                     <button onclick="addStudent()">Hinzufügen</button>
                     `;
 
@@ -86,9 +92,13 @@
         function addStudent() {
             let name = document.querySelector('.newName').value;
 
+            let marker = getSaveMarker(document.querySelector('input[name="marker"]:checked').value);
+
+            console.log(marker);
+
             r = fetch(`${baseUrl}/student/`, { 
                     method: 'POST',
-                    body: JSON.stringify({name: name, id_city: id_city})
+                    body: JSON.stringify({name: name, id_city: id_city, marker: marker})
                 } ).then( () => { 
                     loadStudents();            
                     displayAddForm();
@@ -104,11 +114,11 @@
 
         function updateStudent(id) {
             let name = document.querySelector('.newName').value;
-            
+            let marker = getSaveMarker(document.querySelector('input[name="marker"]:checked').value);
             
             r = fetch(`${baseUrl}/student/?id=${id}`, { 
                     method: 'PUT',
-                    body: JSON.stringify({name: name, id_city: id_city})
+                    body: JSON.stringify({name: name, id_city: id_city, marker: marker})
                 } ).then( () => { 
                      toEdit=-1; 
                      loadStudents();
@@ -135,6 +145,27 @@
         }
 
 
+        function getMarkerRadioButtons(selected) {
+            result="";
+            index=0;
+            markers.forEach(marker => {
+                console.log(selected);
+                console.log(index);
+                if (index == selected) {
+                    checked="checked"
+                } else {
+                    checked="";
+                }
+                result = `${result} <input type="radio" name="marker" value="${index}" ${checked}><img src="../../${marker.iconUrl}" alt="Marker"></input>`;
+
+                index++;
+
+            });
+            return result;            
+        }
+
+
+
         function loadStudents() {
             const response = fetch(`${baseUrl}/student/`)
             response.then(response => response.json() )
@@ -148,20 +179,30 @@
 
                             id_city = student.id_city;
 
+                            console.log(student.marker);
+                            markerHtml = getMarkerRadioButtons(student.marker);
                             html += `<form action="">
                                     <tr>
                                     <td><input type="text" name="name" class="newName" id="update_name" value="${student.name}""></td>
                                     <td class="newPlz">${student.plz}</td>
                                     <td class="newCity">${student.city}</td>
+                                    <td>${markerHtml}</td> 
+
                                     <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
                                     <td><input type="button" value="Cancel" onclick="cancelUpdateStudent()"></td>
                                     </tr></form>`;
 
                         } else {
+
+                            marker = markers[getSaveMarker(student.marker)].iconUrl;
+                            
+
+
                             html += `<tr>
                                     <td>${student.name}</td>
                                     <td>${student.plz}</td>
                                     <td>${student.city}</td>
+                                    <td><img src="../../${marker}" alt="Marker"></td>
                                     <td><button onClick="deleteStudent(`+ student.id + `)">remove</button></td>
                                     <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>
                                 </tr>`;

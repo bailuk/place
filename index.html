@@ -19,11 +19,10 @@
 
 <body>
     <a href="html/admin/">Administrator</a>
-
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-        crossorigin=""></script>
-
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+    
 
 
     <div id="mapid"></div>
@@ -34,16 +33,8 @@
         let map = L.map('mapid');
 
 
-        let options = L.Icon.Default.prototype.options;
-        let myIcon = L.icon({
-            iconUrl: 'html/images/marker-icon-green.png',
-            iconSize: options.iconSize,
-            iconAnchor: options.iconAnchor,
-            popupAnchor: options.popupAnchor,
-            shadowUrl: 'html/images/marker-shadow.png',
-            shadowSize: options.shadowSize,
-            shadowAnchor: options.shadowAnchor
-            });
+
+        
 
 
 
@@ -81,6 +72,7 @@
 
 
         function addStudent(lat, lon, student) {
+            let myIcon = L.icon(markers[getSaveMarker(student.marker)]);
             L.marker([lat, lon], {icon: myIcon}).addTo(map)
                     .bindPopup(student.name)
                     .openPopup();
