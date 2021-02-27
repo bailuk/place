@@ -58,11 +58,5 @@ const initialBounds = {
 }
 
 
-function getSaveMarker(index) {
-    index = parseInt(index);
-    if ( isNaN(index) || index  < 0 || index >= markers.length) {
-        index=0;
-    }
-    return index;
-}
+
 
