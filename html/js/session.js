@@ -32,11 +32,11 @@ function _sessionUpdateStatus(status) {
 function sessionUpdateStatus() {
     fetch(`${baseUrl}/auth/`).then(response => {
         if (response.ok) {
-            response.json().then(json =>_sessionUpdateStatus(json));
+            response.json().then(json =>_sessionUpdateStatus(json)).catch(err => displayError(err));
         } else {
-            response.text().then(text => displayError(text));
+            response.text().then(text => displayError(text)).catch(err => displayError(err));
         }
-    });
+    }).catch(err => displayError(err));
 }
 
 
@@ -49,10 +49,10 @@ function sessionLogin() {
         body: JSON.stringify({ name: name, password: password })
     }).then(response => {
         if (!response.ok) {
-            response.text().then(text => displayError(text));
+            response.text().then(text => displayError(text)).catch(err => displayError(err));
         }
         sessionUpdateStatus();
-    });
+    }).catch(err => displayError(err));
 }
 
 function sessionLogout() {
@@ -60,8 +60,8 @@ function sessionLogout() {
         method: 'POST'
     }).then(response => {
         if (!response.ok) {
-            response.text().then(text => displayError(text));
+            response.text().then(text => displayError(text)).catch(err => displayError(err));
         }
         sessionUpdateStatus();
-    });
+    }).catch(err => displayError(err));
 }

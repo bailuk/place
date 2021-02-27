@@ -104,9 +104,9 @@
                 if (response.ok) {
                     response.json().then(json => {
                         _loadCoordinates(student, json);
-                    });
+                    }).catch(err => displayError(err));
                 } else {
-                    response.text(text => displayError(text));
+                    response.text(text => displayError(text)).catch(err => displayError(err));
                 }
             }).catch(err => displayError(err));
         }
@@ -143,18 +143,12 @@
         fetch(`${baseUrl}/student/`)
             .then(function(response) {
                 if (response.ok) {
-                    response.json().then(function(json) {
-                        _loadStudents(json);
-                    });
+                    response.json().then(json => _loadStudents(json)).catch(err => displayError(err));
                 } else {
-                    response.text().then(function(text) {
-                        displayError(text);
-                    });
+                    response.text().then(text => displayError(text)).catch(err => displayError(err));
                 }
             })
-            .catch(function(err) {
-                displayError(err)
-            });
+            .catch(err => displayError(err));
     }
 
         

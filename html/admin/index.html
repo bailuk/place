@@ -94,9 +94,9 @@
             fetch(`${baseUrl}/city/?name=${search}`)
                 .then(response => {
                     if (response.ok) {
-                        response.json().then(json => _updateCityList(json));
+                        response.json().then(json => _updateCityList(json)).catch(err => displayError(err));
                     } else {
-                        response.text().then(text => displayError(text));
+                        response.text().then(text => displayError(text)).catch(err => displayError(err));
                     }
                 }).catch(err => displayError(err));
         }
@@ -271,10 +271,10 @@
             fetch(`${baseUrl}/student/`)
                 .then(response => {
                     if (response.ok) {
-                        response.json().then(json => _loadStudents(json))
+                        response.json().then(json => _loadStudents(json)).catch(err => displayError(err));
                     } else {
                         document.getElementById('studentListId').innerHTML = '';
-                        response.text().then(text => displayError(text));
+                        response.text().then(text => displayError(text)).catch(err => displayError(err));
                     }
 
                 }).catch(err => displayError(err));
