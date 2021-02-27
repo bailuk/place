@@ -7,7 +7,6 @@ require_once('../../util/util.php');
 try {
 
     session_start();
-
     throwOnInvalidSession();
 
 
@@ -15,7 +14,12 @@ try {
     $entity = new Entity(connect(), 'student');
 
     if ($method == 'GET') {
-        $what = "student.id AS id, student.name AS name, student.marker AS marker, city.plz AS plz, city.city AS city, city.id AS id_city";
+        if ($_SESSION['admin']) {
+            $what = "student.id AS id, student.name AS name, student.marker AS marker, city.plz AS plz, city.city AS city, city.id AS id_city";
+        } else {
+            $what = "student.id AS id, CONCAT('Student ', student.id) AS name, student.marker AS marker, city.plz AS plz, city.city AS city, city.id AS id_city";
+        }
+
         $join = "LEFT JOIN city ON city.id = student.id_city";
 
         if (isset($_GET['id'])) {

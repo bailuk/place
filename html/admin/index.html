@@ -7,18 +7,22 @@
     <title>Project Happy Place</title>
 </head>
 <body>
-    <a href="../../">Karte</a>
-    <h1>Students</h1>
-    <div class="container"></div>
+    <a href="../../">map</a>
+
+    <div id="sessionStatusId"></div>
+
+    <h2>students</h2>
+    <div id="studentListId"></div>
  
-    <div class="add_student"></div>
+    <h2>add student</h2>
+    <div id="studentAddId"></div>
  
     
-    <h2>Ort Suchen</h2>
-    <div class="searchCity">
-        <label for="search">Ort suchen</label>
-        <input type="text" name="search" id="search" onkeyup="updateCityList()">
-        <div class="cityList"></div>
+    <h2>select city</h2>
+    <div>
+        <label for="searchCityId">search</label>
+        <input type="text" name="search" id="citySearchId" onkeyup="updateCityList()">
+        <div id="cityListId"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
@@ -27,78 +31,106 @@
 
 
     <script src="../js/config.js"></script>
+    <script src="../js/session.js"></script>
+
     <script>
 
-        let toEdit=-1;
-        let id_city=-1;
+        initSession('sessionStatusId', startSession);
+
+
+        let studentEditId = -2;
+        let citySelectedId = -1;
+        
+
+        function startSession(status) {
+            console.log(status);
+            if (status.auth && status.admin) {
+                studentEditId = -1;
+            } else {
+                studentEditId = -2;
+            }
+
+            loadStudents();
+            displayAddForm();
+            updateCityList();
+        }
 
 
         function updateCityList() {
-            search = document.getElementById("search").value;
-            const response = fetch(`${baseUrl}/city/?name=${search}`);
+            const search = document.getElementById('citySearchId').value;
+            const cityList = document.getElementById('cityListId');
 
-            response
+            fetch(`${baseUrl}/city/?name=${search}`)
                 .then(response => response.json())
                 .then(json => { 
                     let html = '<table>';
                 
                     json.forEach(city => {
+                
+                        let htmlSelect = '';
                     
+                        if (studentEditId > -2) {
+                            htmlSelect = `<td><button onClick="selectCity('${city.id}', '${city.plz}', '${city.city}')">select</button></td>`
+                        }    
+
                         html += `<tr>
                                 <td>${city.plz}</td>
                                 <td>${city.city}</td>
-                                <td><button onClick="useCity('${city.id}', '${city.plz}', '${city.city}')">übernehmen</button></td>
+                                ${htmlSelect}
                             </tr>`;
                     })
               
                     html += "</table>";
-                    let container = document.querySelector('.cityList');
-                    container.innerHTML = html;                    
+                    
+                    cityList.innerHTML = html;                    
                 
+                }).catch(err => {
+                    console.log(err);
+                    cityList.innerHTML = '<p>no connection</p>';
                 });
-
         }
 
-        function useCity(id, plz, name) {
-            id_city=id;
-            document.querySelector('.newPlz').innerHTML = plz;
-            document.querySelector('.newCity').innerHTML = name;
+
+        function selectCity(id, plz, name) {
+            citySelectedId = id;
+            document.getElementById('cityPlzId').innerHTML = plz;
+            document.getElementById('cityNameId').innerHTML = name;
         }
 
 
         function displayAddForm() {
             
-            if (toEdit < 0) {
-                id_city=-1;
+            if (studentEditId == -1) {
+                citySelectedId=-1;
+
                 markerHtml = getMarkerRadioButtons();
                 html=`
-                    <h2>Schüler hinzufügen</h2>                    
-                    <label for="add_name">Name</label>
+                    <label for="add_name">name</label>
                     <input type="text" name="name" id="add_name" class="newName">
-                    <span>Ort: </span> <span class="newPlz"></span> <span class="newCity">Bitte aus Liste auswählen</span>
+                    <span>city: </span> <span id="cityPlzId"></span> <span id="cityNameId">[select from list]</span>
                     <span>${markerHtml}</span> 
-                    <button onclick="addStudent()">Hinzufügen</button>
+                    <button onclick="addStudent()">add</button>
                     `;
 
+            } else if (studentEditId == -2) {
+                html = '<p>[not signed in as admin]</p>';
             } else {
-                html = '';
+                html = '<p>[updating student...]</p>';
             }
-            let container = document.querySelector('.add_student');
-            container.innerHTML = html;
+            document.getElementById('studentAddId').innerHTML = html;
         }
 
         
 
         function addStudent() {
             let name = document.querySelector('.newName').value;
-
             let marker = getSaveMarker(document.querySelector('input[name="marker"]:checked').value);
 
             console.log(marker);
 
             r = fetch(`${baseUrl}/student/`, { 
                     method: 'POST',
-                    body: JSON.stringify({name: name, id_city: id_city, marker: marker})
+                    body: JSON.stringify({name: name, id_city: citySelectedId, marker: marker})
                 } ).then( () => { 
                     loadStudents();            
                     displayAddForm();
@@ -107,9 +139,7 @@
         }
 
         function cancelUpdateStudent() {
-            toEdit=-1;
-            displayAddForm();
-            loadStudents();
+            initSession('sessionStatusId', startSession);
         }
 
         function updateStudent(id) {
@@ -118,11 +148,9 @@
             
             r = fetch(`${baseUrl}/student/?id=${id}`, { 
                     method: 'PUT',
-                    body: JSON.stringify({name: name, id_city: id_city, marker: marker})
+                    body: JSON.stringify({name: name, id_city: citySelectedId, marker: marker})
                 } ).then( () => { 
-                     toEdit=-1; 
-                     loadStudents();
-                     displayAddForm();
+                    initSession('sessionStatusId', startSession);
                 } );
                    
         }
@@ -132,14 +160,13 @@
             console.log(id); 
             response = fetch(`${baseUrl}/student/?id=${id}`, { method: 'DELETE'} )
                 .then(() => {
-                    loadStudents();
-                    displayAddForm();        
+                    initSession('sessionStatusId', startSession);
                 });
         }
 
 
         function editStudent(id) {
-            toEdit=id;
+            studentEditId = id;
             loadStudents();
             displayAddForm();
         }
@@ -150,8 +177,6 @@
             index=0;
             selected = getSaveMarker(selected);
             markers.forEach(marker => {
-                console.log(selected);
-                console.log(index);
                 if (index == selected) {
                     checked="checked"
                 } else {
@@ -168,25 +193,26 @@
 
 
         function loadStudents() {
-            const response = fetch(`${baseUrl}/student/`)
-            response.then(response => response.json() )
+            const studentList = document.getElementById('studentListId');
+            
+            fetch(`${baseUrl}/student/`)
+                .then(response => response.json() )
                 .then(json => { 
                     let html = '<table>';
                 
                     json.forEach(student => {
                         hans = student.name;
 
-                        if (student.id == toEdit) {
+                        if (student.id == studentEditId) {
 
-                            id_city = student.id_city;
+                            citySelectedId = student.id_city;
 
-                            console.log(student.marker);
                             markerHtml = getMarkerRadioButtons(student.marker);
                             html += `<form action="">
                                     <tr>
                                     <td><input type="text" name="name" class="newName" id="update_name" value="${student.name}""></td>
-                                    <td class="newPlz">${student.plz}</td>
-                                    <td class="newCity">${student.city}</td>
+                                    <td id="cityPlzId">${student.plz}</td>
+                                    <td id="cityNameId">${student.city}</td>
                                     <td>${markerHtml}</td> 
 
                                     <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
@@ -198,27 +224,33 @@
                             marker = markers[getSaveMarker(student.marker)].iconUrl;
                             
 
+                            let htmlEdit = '';
+
+                            if (studentEditId > -2) {
+                                htmlEdit = `<td><button onClick="deleteStudent(`+ student.id + `)">remove</button></td>
+                                            <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>`;
+
+                            }
 
                             html += `<tr>
                                     <td>${student.name}</td>
                                     <td>${student.plz}</td>
                                     <td>${student.city}</td>
                                     <td><img src="../../${marker}" alt="Marker"></td>
-                                    <td><button onClick="deleteStudent(`+ student.id + `)">remove</button></td>
-                                    <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>
-                                </tr>`;
+                                    ${htmlEdit}
+                                    </tr>`;
                         }
                    
                     });
                     html += "</table>";
-                    let container = document.querySelector('.container');
-                    container.innerHTML = html;
+                    studentList.innerHTML = html;
                 })
-                .catch(err => console.log('Request Failed', err));
+                .catch(err => {
+                    studentList.innerHTML = '<p>not signed in</p>';
+                });
         }
 
-        loadStudents();
-        displayAddForm();        
+            
     </script>
 
 </body>

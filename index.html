@@ -23,6 +23,7 @@
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
     
+    <a href="html/admin/">list</a>
     <div id="sessionId"></div>
     <div id="mapId"></div>
 
@@ -33,36 +34,6 @@
     
        
     <script>
-
-    function initSession(elementId) {
-        r = fetch(`${baseUrl}/auth/`).then(response => response.json()).then(json => { 
-            let html='';
-            
-            if (json.auth) {
-                let user = json.name;
-
-                if (json.admin) {
-                    user = `<a href="html/admin/">${json.name}</a>`;
-                }
-
-                html = `<div>signed in as ${user} <button onclick="sessionLogout('${elementId}')">sign out</button></div>`;
-                
-            } else {
-                html = `<div>
-                        <label for="name">login</label><input type="text" name="name" id="name">
-                        <label for="password">passwort</label><input type="password" name="password" id="password">
-                        <button onclick="sessionLogin('${elementId}')">sign in</button>
-                        </div>`;
-                
-            }
-
-            console.log(elementId)
-            document.getElementById(elementId).innerHTML = html;
-            startSession();
-        });
-    }
-
-
     let map = L.map('mapId');
     let west = initialBounds.west;
     let east = initialBounds.east;
@@ -75,11 +46,12 @@
 
     let studentsLayer = L.layerGroup().addTo(map);
 
-    function startSession() {
+    initSession('sessionId', startSession);
+
+    function startSession(status) {
         loadStudents();
         frameStudents();
     }
-
 
     function frameStudents() {
         map.fitBounds([[south, west], [north, east]]);
@@ -161,7 +133,7 @@
         .catch(err => console.log('Request Failed', err));
     }
 
-    initSession('sessionId');
+    
         
     </script>
 

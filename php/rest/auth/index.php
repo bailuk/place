@@ -44,7 +44,7 @@ try {
             foreach( $users as $user) {
                 if ($user['name'] == $name && $user['password'] == $password) {
                     $_SESSION['name'] = $name;
-                    $_SESSION['admin'] = true;
+                    $_SESSION['admin'] = $user['admin'];
                     $_SESSION['auth'] = true;
                     break;
                 }
