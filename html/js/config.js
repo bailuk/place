@@ -2,9 +2,6 @@
 let baseUrl='http://localhost:8080/php/place/php/rest';
 
 
-
-
-
 let options = L.Icon.Default.prototype.options;
 
 
@@ -53,6 +50,14 @@ let markers = [
 ];
 
 
+const initialBounds = {
+    west: 8.721067,
+    east: 8.733311,
+    north: 47.633246,
+    south: 47.625047
+}
+
+
 function getSaveMarker(index) {
     index = parseInt(index);
     if ( isNaN(index) || index  < 0 || index >= markers.length) {
@@ -60,3 +65,4 @@ function getSaveMarker(index) {
     }
     return index;
 }
+

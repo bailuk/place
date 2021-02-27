@@ -10,7 +10,7 @@
         crossorigin="" />
     <title>Happy Place</title>
     <style>
-        #mapid {
+        #mapId {
             height: 800px;
             width: 800px;
         }
@@ -18,109 +18,151 @@
 </head>
 
 <body>
-    <a href="html/admin/">Administrator</a>
+    
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
     
+    <div id="sessionId"></div>
+    <div id="mapId"></div>
 
-
-    <div id="mapid"></div>
-    <button onclick="frameStudents()">Frame map</button>
+    <button onclick="frameStudents()">frame map</button>
 
     <script src="html/js/config.js"></script>
+    <script src="html/js/session.js"></script>
+    
+       
     <script>
-        let map = L.map('mapid');
+
+    function initSession(elementId) {
+        r = fetch(`${baseUrl}/auth/`).then(response => response.json()).then(json => { 
+            let html='';
+            
+            if (json.auth) {
+                let user = json.name;
+
+                if (json.admin) {
+                    user = `<a href="html/admin/">${json.name}</a>`;
+                }
+
+                html = `<div>signed in as ${user} <button onclick="sessionLogout('${elementId}')">sign out</button></div>`;
+                
+            } else {
+                html = `<div>
+                        <label for="name">login</label><input type="text" name="name" id="name">
+                        <label for="password">passwort</label><input type="password" name="password" id="password">
+                        <button onclick="sessionLogin('${elementId}')">sign in</button>
+                        </div>`;
+                
+            }
+
+            console.log(elementId)
+            document.getElementById(elementId).innerHTML = html;
+            startSession();
+        });
+    }
 
 
+    let map = L.map('mapId');
+    let west = initialBounds.west;
+    let east = initialBounds.east;
+    let north = initialBounds.north;
+    let south = initialBounds.south;
 
-        
-
-
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+    }).addTo(map);
 
+    let studentsLayer = L.layerGroup().addTo(map);
 
-        let west = 8.721067;
-        let east = 8.733311;
-        let north = 47.633246;
-        let south = 47.625047;
-        frameStudents();
-
-
-        function frameStudents() {
-            map.fitBounds([[south, west], [north, east]]);
-        }
-
-        function frameStudent(lat, lon) {
-            if (lon < west) {
-                west = lon;
-            } else if (lon > east) {
-                east = lon;
-            }
-
-            if (lat > north) {
-                north = lat;
-            } else  if (lat < south) {
-                south = lat;
-            }
-
-            frameStudents();
-        }
-
-
-        function addStudent(lat, lon, student) {
-            let myIcon = L.icon(markers[getSaveMarker(student.marker)]);
-            L.marker([lat, lon], {icon: myIcon}).addTo(map)
-                    .bindPopup(student.name)
-                    .openPopup();
-
-            frameStudent(lat, lon);    
-        }
-
-
-        function loadCoordinates(student) {
-            fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
-                .then(response => response.json())
-                .then(json => {
-                    let lat = json.features[0].geometry.coordinates[1];
-                    let lon = json.features[0].geometry.coordinates[0];
-
-                    localStorage.setItem(`${student.id_city}_lat`, lat);
-                    localStorage.setItem(`${student.id_city}_lon`, lon);
-
-                    addStudent(lat, lon, student);
-
-                })
-                .catch(err => console.log('Request Failed', err));
-
-        }
-
-        function loadStudents() {
-            fetch(`${baseUrl}/student/`)
-                .then(response => response.json())
-                .then(json => {
-
-                    json.forEach(student => {
-
-                        let lat = parseFloat(localStorage.getItem(`${student.id_city}_lat`));
-                        let lon = parseFloat(localStorage.getItem(`${student.id_city}_lon`));
-
-                        if (isNaN(lat) || isNaN(lon)) {
-                            loadCoordinates(student);
-
-                        } else {
-                            addStudent(lat, lon, student);
-                        }
-                    })
-                })
-                .catch(err => console.log('Request Failed', err));
-        }
-
-
+    function startSession() {
         loadStudents();
+        frameStudents();
+    }
+
+
+    function frameStudents() {
+        map.fitBounds([[south, west], [north, east]]);
+    }
+
+    function frameStudent(lat, lon) {
+        if (lon < west) {
+            west = lon;
+        } else if (lon > east) {
+            east = lon;
+        }
+
+        if (lat > north) {
+            north = lat;
+        } else  if (lat < south) {
+            south = lat;
+        }
+
+        frameStudents();
+    }
+
+
+    function addStudent(lat, lon, student) {
+        let myIcon = L.icon(markers[getSaveMarker(student.marker)]);
+        L.marker([lat, lon], {icon: myIcon}).addTo(studentsLayer)
+                .bindPopup(student.name)
+                .openPopup();
+
+        frameStudent(lat, lon);    
+    }
+
+
+    function loadCoordinates(student) {
+        fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
+            .then(response => response.json())
+            .then(json => {
+                let lat = json.features[0].geometry.coordinates[1];
+                let lon = json.features[0].geometry.coordinates[0];
+
+                localStorage.setItem(`${student.id_city}_lat`, lat);
+                localStorage.setItem(`${student.id_city}_lon`, lon);
+
+                addStudent(lat, lon, student);
+
+            })
+            .catch(err => console.log('Request Failed', err));
+        }
+
+
+    function clearStudents() {
+        west  = initialBounds.west;
+        east  = initialBounds.east;
+        north = initialBounds.north;
+        south = initialBounds.south; 
+        studentsLayer.clearLayers();
+        frameStudents();
+    }
+
+    function loadStudents() {
+        clearStudents();
+
+        fetch(`${baseUrl}/student/`)
+            .then(response => response.json())
+            .then(json => {
+
+                json.forEach(student => {
+
+                    let lat = parseFloat(localStorage.getItem(`${student.id_city}_lat`));
+                    let lon = parseFloat(localStorage.getItem(`${student.id_city}_lon`));
+
+                    if (isNaN(lat) || isNaN(lon)) {
+                        loadCoordinates(student);
+
+                    } else {
+                        addStudent(lat, lon, student);
+                    }
+                })
+        })
+        .catch(err => console.log('Request Failed', err));
+    }
+
+    initSession('sessionId');
+        
     </script>
 
 </body>
