@@ -1,6 +1,6 @@
 
-create database place;
-use place;
+CREATE DATABASE place;
+USE place;
 
 CREATE TABLE city (
     id INTEGER(6) PRIMARY KEY AUTO_INCREMENT,
