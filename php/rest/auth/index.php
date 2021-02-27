@@ -5,12 +5,6 @@ require_once('../../entity/entity.php');
 require_once('../../util/util.php');
 
 
-$users = array(
-    array('password' => "123", 'name' => "hans", 'admin' => false),
-    array('password' => "admin", 'name' => "admin", 'admin' => true),
-);
-
-
 function echoSessionStatus() {
     $result = getSessionStatus();
     header("content-Type: application/json; charset=utf-8'");
