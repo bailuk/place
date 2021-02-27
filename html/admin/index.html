@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Happy Place</title>
 </head>
+
 <body>
+
+    <div id="errorId"></div>
+
     <a href="../../">map</a>
 
     <div id="sessionStatusId"></div>
 
     <h2>students</h2>
     <div id="studentListId"></div>
- 
+
     <h2>add student</h2>
     <div id="studentAddId"></div>
- 
-    
+
+
     <h2>select city</h2>
     <div>
         <label for="searchCityId">search</label>
@@ -31,6 +36,7 @@
 
 
     <script src="../js/config.js"></script>
+    <script src="../js/util.js"></script>
     <script src="../js/session.js"></script>
 
     <script>
@@ -40,7 +46,7 @@
 
         let studentEditId = -2;
         let citySelectedId = -1;
-        
+
 
         function startSession(status) {
             console.log(status);
@@ -56,38 +62,43 @@
         }
 
 
+        function _updateCityList(cities) {
+            const cityList = document.getElementById('cityListId');
+            let html = '<table>';
+
+            cities.forEach(city => {
+
+                let htmlSelect = '';
+
+                if (studentEditId > -2) {
+                    htmlSelect = `<td><button onClick="selectCity('${city.id}', '${city.plz}', '${city.city}')">select</button></td>`
+                }
+
+                html += `<tr>
+                        <td>${city.plz}</td>
+                        <td>${city.city}</td>
+                        ${htmlSelect}
+                    </tr>`;
+            })
+
+            html += "</table>";
+
+            cityList.innerHTML = html;
+        }
+
+
         function updateCityList() {
             const search = document.getElementById('citySearchId').value;
-            const cityList = document.getElementById('cityListId');
+
 
             fetch(`${baseUrl}/city/?name=${search}`)
-                .then(response => response.json())
-                .then(json => { 
-                    let html = '<table>';
-                
-                    json.forEach(city => {
-                
-                        let htmlSelect = '';
-                    
-                        if (studentEditId > -2) {
-                            htmlSelect = `<td><button onClick="selectCity('${city.id}', '${city.plz}', '${city.city}')">select</button></td>`
-                        }    
-
-                        html += `<tr>
-                                <td>${city.plz}</td>
-                                <td>${city.city}</td>
-                                ${htmlSelect}
-                            </tr>`;
-                    })
-              
-                    html += "</table>";
-                    
-                    cityList.innerHTML = html;                    
-                
-                }).catch(err => {
-                    console.log(err);
-                    cityList.innerHTML = '<p>no connection</p>';
-                });
+                .then(response => {
+                    if (response.ok) {
+                        response.json().then(json => _updateCityList(json));
+                    } else {
+                        response.text().then(text => displayError(text));
+                    }
+                }).catch(err => displayError(err));
         }
 
 
@@ -99,12 +110,12 @@
 
 
         function displayAddForm() {
-            
+
             if (studentEditId == -1) {
-                citySelectedId=-1;
+                citySelectedId = -1;
 
                 markerHtml = getMarkerRadioButtons();
-                html=`
+                html = `
                     <label for="add_name">name</label>
                     <input type="text" name="name" id="add_name" class="newName">
                     <span>city: </span> <span id="cityPlzId"></span> <span id="cityNameId">[select from list]</span>
@@ -120,7 +131,7 @@
             document.getElementById('studentAddId').innerHTML = html;
         }
 
-        
+
 
         function addStudent() {
             let name = document.querySelector('.newName').value;
@@ -128,14 +139,18 @@
 
             console.log(marker);
 
-            r = fetch(`${baseUrl}/student/`, { 
-                    method: 'POST',
-                    body: JSON.stringify({name: name, id_city: citySelectedId, marker: marker})
-                } ).then( () => { 
-                    loadStudents();            
-                    displayAddForm();
-                } );
-                    
+            fetch(`${baseUrl}/student/`, {
+                method: 'POST',
+                body: JSON.stringify({ name: name, id_city: citySelectedId, marker: marker })
+            }).then(response => {
+                if (!response.ok()) {
+                    response.text().then(text => displayError(text));
+                }
+
+                loadStudents();
+                displayAddForm();
+            }).catch(err => displayError(err));;
+
         }
 
         function cancelUpdateStudent() {
@@ -145,23 +160,32 @@
         function updateStudent(id) {
             let name = document.querySelector('.newName').value;
             let marker = getSaveMarker(document.querySelector('input[name="marker"]:checked').value);
-            
-            r = fetch(`${baseUrl}/student/?id=${id}`, { 
-                    method: 'PUT',
-                    body: JSON.stringify({name: name, id_city: citySelectedId, marker: marker})
-                } ).then( () => { 
-                    initSession('sessionStatusId', startSession);
-                } );
-                   
+
+            fetch(`${baseUrl}/student/?id=${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ name: name, id_city: citySelectedId, marker: marker })
+            }).then(response => {
+                if (!response.ok()) {
+                    response.text().then(text => displayError(text));
+                }
+
+                initSession('sessionStatusId', startSession);
+            }).catch(err => displayError(err));;
+
         }
 
 
         function deleteStudent(id) {
-            console.log(id); 
-            response = fetch(`${baseUrl}/student/?id=${id}`, { method: 'DELETE'} )
-                .then(() => {
+            console.log(id);
+            response = fetch(`${baseUrl}/student/?id=${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (!response.ok()) {
+                        response.text().then(text => displayError(text));
+                    }
+
                     initSession('sessionStatusId', startSession);
-                });
+
+                }).catch(err => displayError(err));;
         }
 
 
@@ -173,85 +197,91 @@
 
 
         function getMarkerRadioButtons(selected) {
-            result="";
-            index=0;
+            result = "";
+            index = 0;
             selected = getSaveMarker(selected);
             markers.forEach(marker => {
                 if (index == selected) {
-                    checked="checked"
+                    checked = "checked"
                 } else {
-                    checked="";
+                    checked = "";
                 }
                 result = `${result} <input type="radio" name="marker" value="${index}" ${checked}><img src="../../${marker.iconUrl}" alt="Marker"></input>`;
 
                 index++;
 
             });
-            return result;            
+            return result;
         }
 
 
+        function _loadStudents(students) {
+            const studentList = document.getElementById('studentListId');
+
+            let html = '<table>';
+
+            students.forEach(student => {
+                hans = student.name;
+
+                if (student.id == studentEditId) {
+
+                    citySelectedId = student.id_city;
+
+                    markerHtml = getMarkerRadioButtons(student.marker);
+                    html += `<form action="">
+                                <tr>
+                                <td><input type="text" name="name" class="newName" id="update_name" value="${student.name}""></td>
+                                <td id="cityPlzId">${student.plz}</td>
+                                <td id="cityNameId">${student.city}</td>
+                                <td>${markerHtml}</td> 
+
+                                <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
+                                <td><input type="button" value="Cancel" onclick="cancelUpdateStudent()"></td>
+                                </tr></form>`;
+
+                } else {
+
+                    marker = markers[getSaveMarker(student.marker)].iconUrl;
+
+
+                    let htmlEdit = '';
+
+                    if (studentEditId > -2) {
+                        htmlEdit = `<td><button onClick="deleteStudent(` + student.id + `)">remove</button></td>
+                                        <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>`;
+
+                    }
+
+                    html += `<tr>
+                                <td>${student.name}</td>
+                                <td>${student.plz}</td>
+                                <td>${student.city}</td>
+                                <td><img src="../../${marker}" alt="Marker"></td>
+                                ${htmlEdit}
+                                </tr>`;
+                }
+
+            });
+            html += "</table>";
+            studentList.innerHTML = html;
+
+        }
 
         function loadStudents() {
-            const studentList = document.getElementById('studentListId');
-            
             fetch(`${baseUrl}/student/`)
-                .then(response => response.json() )
-                .then(json => { 
-                    let html = '<table>';
-                
-                    json.forEach(student => {
-                        hans = student.name;
+                .then(response => {
+                    if (response.ok) {
+                        response.json().then(json => _loadStudents(json))
+                    } else {
+                        response.text().then(text => displayError(text));
+                    }
 
-                        if (student.id == studentEditId) {
-
-                            citySelectedId = student.id_city;
-
-                            markerHtml = getMarkerRadioButtons(student.marker);
-                            html += `<form action="">
-                                    <tr>
-                                    <td><input type="text" name="name" class="newName" id="update_name" value="${student.name}""></td>
-                                    <td id="cityPlzId">${student.plz}</td>
-                                    <td id="cityNameId">${student.city}</td>
-                                    <td>${markerHtml}</td> 
-
-                                    <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
-                                    <td><input type="button" value="Cancel" onclick="cancelUpdateStudent()"></td>
-                                    </tr></form>`;
-
-                        } else {
-
-                            marker = markers[getSaveMarker(student.marker)].iconUrl;
-                            
-
-                            let htmlEdit = '';
-
-                            if (studentEditId > -2) {
-                                htmlEdit = `<td><button onClick="deleteStudent(`+ student.id + `)">remove</button></td>
-                                            <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>`;
-
-                            }
-
-                            html += `<tr>
-                                    <td>${student.name}</td>
-                                    <td>${student.plz}</td>
-                                    <td>${student.city}</td>
-                                    <td><img src="../../${marker}" alt="Marker"></td>
-                                    ${htmlEdit}
-                                    </tr>`;
-                        }
-                   
-                    });
-                    html += "</table>";
-                    studentList.innerHTML = html;
-                })
-                .catch(err => {
-                    studentList.innerHTML = '<p>not signed in</p>';
-                });
+                }).catch(err => displayError(err));
         }
 
-            
+
     </script>
 
 </body>
+
 </html>

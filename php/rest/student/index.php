@@ -57,9 +57,9 @@ try {
         } else {
             throw new \Exception('Missing parameter: id');
         }
-
-        // TODO: throw missing parameter error
     }
+
+    
 } catch (Exception $e) {
     exitError($e);
 }

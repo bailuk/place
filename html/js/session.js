@@ -12,23 +12,30 @@ function initSession(elementId, startSession) {
 
 }
 
-function sessionUpdateStatus() {
-    r = fetch(`${baseUrl}/auth/`).then(response => response.json()).then(json => {
-        const statusElement = document.getElementById(sessionElementId);
+function _sessionUpdateStatus(status) {
+    const statusElement = document.getElementById(sessionElementId);
         
-        if (json.auth) {
-            statusElement.innerHTML = `<div>signed in as ${json.name} <button onclick="sessionLogout()">sign out</button></div>`;
+    if (status.auth) {
+        statusElement.innerHTML = `<div>signed in as ${status.name} <button onclick="sessionLogout()">sign out</button></div>`;
+    } else {
+        statusElement.innerHTML = 
+            `<div>
+                <label for="name">login</label><input type="text" name="name" id="sessionLoginId">
+                <label for="password">passwort</label><input type="password" name="password" id="sessionPasswordId">
+                <button onclick="sessionLogin()">sign in</button>
+            </div>`;
+    }
+    sessionStartSession(status);
+}
 
+
+function sessionUpdateStatus() {
+    fetch(`${baseUrl}/auth/`).then(response => {
+        if (response.ok) {
+            response.json().then(json =>_sessionUpdateStatus(json));
         } else {
-            statusElement.innerHTML = 
-                        `<div>
-                            <label for="name">login</label><input type="text" name="name" id="sessionLoginId">
-                            <label for="password">passwort</label><input type="password" name="password" id="sessionPasswordId">
-                            <button onclick="sessionLogin()">sign in</button>
-                        </div>`;
+            response.text().then(text => displayError(text));
         }
-        
-        sessionStartSession(json);
     });
 }
 
@@ -37,18 +44,24 @@ function sessionLogin() {
     const name = document.getElementById('sessionLoginId').value;
     const password = document.getElementById('sessionPasswordId').value;
 
-    r = fetch(`${baseUrl}/auth/`, {
+    fetch(`${baseUrl}/auth/`, {
         method: 'POST',
         body: JSON.stringify({ name: name, password: password })
-    }).then(() => {
+    }).then(response => {
+        if (!response.ok) {
+            response.text().then(text => displayError(text));
+        }
         sessionUpdateStatus();
     });
 }
 
 function sessionLogout() {
-    r = fetch(`${baseUrl}/auth/?logout=true`, {
+    fetch(`${baseUrl}/auth/?logout=true`, {
         method: 'POST'
-    }).then(() => {
+    }).then(response => {
+        if (!response.ok) {
+            response.text().then(text => displayError(text));
+        }
         sessionUpdateStatus();
     });
 }

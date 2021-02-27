@@ -11,6 +11,13 @@ $users = array(
 );
 
 
+function echoSessionStatus() {
+    $result = getSessionStatus();
+    header("content-Type: application/json; charset=utf-8'");
+    echo json_encode($result);
+}
+
+
 try {
 
     session_start();
@@ -18,19 +25,14 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method == 'GET') {
-        $result = getSessionStatus();
-        header("content-Type: application/json; charset=utf-8'");
-        echo json_encode($result);
+        echoSessionStatus();
 
-
-    } else if ($method == 'POST') {
+    } else if ($method == 'POST' or $method == 'PUT') {
         
 
         if (isset($_GET['logout'])) {
             $_SESSION['auth'] = false;
-            $result = getSessionStatus();
-            header("content-Type: application/json; charset=utf-8'");
-            echo json_encode($result);
+            echoSessionStatus();
     
             
         } else {
@@ -49,13 +51,12 @@ try {
                     break;
                 }
             }
-            $result = getSessionStatus();
-            header("content-Type: application/json; charset=utf-8'");
-            echo json_encode($result);
-    
+
+            throwOnFailedLogin();
+            echoSessionStatus();
         }
     }
-
 } catch (Exception $e) {
     exitError($e);
 }
+

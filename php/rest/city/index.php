@@ -32,6 +32,7 @@ try {
         echo json_encode($result);
 
     }
+    
 } catch (Exception $e) {
     exitError($e);
 }

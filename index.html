@@ -23,6 +23,7 @@
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
     
+    <div id="errorId"></div>
     <a href="html/admin/">list</a>
     <div id="sessionId"></div>
     <div id="mapId"></div>
@@ -30,8 +31,10 @@
     <button onclick="frameStudents()">frame map</button>
 
     <script src="html/js/config.js"></script>
+    <script src="html/js/util.js"></script>
     <script src="html/js/session.js"></script>
-    
+
+
        
     <script>
     let map = L.map('mapId');
@@ -84,20 +87,28 @@
     }
 
 
+    function _loadCoordinates(student, geojson) {
+        let lat = geojson.features[0].geometry.coordinates[1];
+        let lon = geojson.features[0].geometry.coordinates[0];
+
+        localStorage.setItem(`${student.id_city}_lat`, lat);
+        localStorage.setItem(`${student.id_city}_lon`, lon);
+
+        addStudent(lat, lon, student);
+    }
+
+
     function loadCoordinates(student) {
         fetch(`https://nominatim.openstreetmap.org/search?city=${student.city}&postalcode=${student.plz}&format=geojson`)
-            .then(response => response.json())
-            .then(json => {
-                let lat = json.features[0].geometry.coordinates[1];
-                let lon = json.features[0].geometry.coordinates[0];
-
-                localStorage.setItem(`${student.id_city}_lat`, lat);
-                localStorage.setItem(`${student.id_city}_lon`, lon);
-
-                addStudent(lat, lon, student);
-
-            })
-            .catch(err => console.log('Request Failed', err));
+            .then(response => {
+                if (response.ok) {
+                    response.json().then(json => {
+                        _loadCoordinates(student, json);
+                    });
+                } else {
+                    response.text(text => displayError(text));
+                }
+            }).catch(err => displayError(err));
         }
 
 
@@ -110,30 +121,42 @@
         frameStudents();
     }
 
+
+    function _loadStudents(students) {
+        students.forEach(function(student) {
+            let lat = parseFloat(localStorage.getItem(`${student.id_city}_lat`));
+            let lon = parseFloat(localStorage.getItem(`${student.id_city}_lon`));
+
+            if (isNaN(lat) || isNaN(lon)) {
+                loadCoordinates(student);
+
+            } else {
+                addStudent(lat, lon, student);
+            }
+        });
+    
+    }
+
     function loadStudents() {
         clearStudents();
 
         fetch(`${baseUrl}/student/`)
-            .then(response => response.json())
-            .then(json => {
-
-                json.forEach(student => {
-
-                    let lat = parseFloat(localStorage.getItem(`${student.id_city}_lat`));
-                    let lon = parseFloat(localStorage.getItem(`${student.id_city}_lon`));
-
-                    if (isNaN(lat) || isNaN(lon)) {
-                        loadCoordinates(student);
-
-                    } else {
-                        addStudent(lat, lon, student);
-                    }
-                })
-        })
-        .catch(err => console.log('Request Failed', err));
+            .then(function(response) {
+                if (response.ok) {
+                    response.json().then(function(json) {
+                        _loadStudents(json);
+                    });
+                } else {
+                    response.text().then(function(text) {
+                        displayError(text);
+                    });
+                }
+            })
+            .catch(function(err) {
+                displayError(err)
+            });
     }
 
-    
         
     </script>
 

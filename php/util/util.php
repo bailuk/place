@@ -17,11 +17,9 @@ function convertToInteger($entity, $ids) {
 function exitError(Exception $e) {
     $internalServerError=500;
 
-    header('Content-Type: text/html; charset=utf-8');
+    header('Content-Type: text/plain; charset=utf-8');
     http_response_code($internalServerError);
-    echo "<pre>";
     echo $e->getMessage();
-    echo "</pre>";
     exit(1);
 }
 
@@ -34,6 +32,13 @@ function getSessionStatus() {
     }
     return $result;
 
+}
+
+function throwOnFailedLogin() {
+    $status = getSessionStatus();
+    if ($status['auth'] == false) {
+        throw new \Exception('Wrong username or password');
+    }
 }
 
 
