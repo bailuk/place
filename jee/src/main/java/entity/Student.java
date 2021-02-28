@@ -22,8 +22,8 @@ public class Student {
     private int id;
 
 
-    @Column(length = 30)
     private String name;
+    private int marker;
 
 
     @ManyToOne
@@ -31,14 +31,26 @@ public class Student {
     private City city;
 
     
-    public int getId() {
+    public void init(StudentIn studentIn, City city) {
+    	name = studentIn.name;
+    	marker = studentIn.marker;
+    	this.city = city; 
+	}
+
+    
+	public int getId() {
         return id;
     }
 
+	
     public String getName() {
         return name;
     }
 
+    public int getMarker() {
+    	return marker;
+    }
+    
     public int getCityId() {
         return city.getId();
     }
@@ -50,4 +62,5 @@ public class Student {
     public String getCity() {
         return city.getCity();
     }
+
 }
