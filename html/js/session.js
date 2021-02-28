@@ -16,13 +16,13 @@ function _sessionUpdateStatus(status) {
     const statusElement = document.getElementById(sessionElementId);
         
     if (status.auth) {
-        statusElement.innerHTML = `<div>signed in as ${status.name} <button onclick="sessionLogout()">sign out</button></div>`;
+        statusElement.innerHTML = `<div>signed in as ${status.login} <button onclick="_sessionSignout()">sign out</button></div>`;
     } else {
         statusElement.innerHTML = 
             `<div>
-                <label for="name">login</label><input type="text" name="name" id="sessionLoginId">
-                <label for="password">passwort</label><input type="password" name="password" id="sessionPasswordId">
-                <button onclick="sessionLogin()">sign in</button>
+                <label for="sessionLoginId">login</label><input type="text" id="sessionLoginId">
+                <label for="sessionPasswordId">passwort</label><input type="password" id="sessionPasswordId">
+                <button onclick="_sessionSignin()">sign in</button>
             </div>`;
     }
     sessionStartSession(status);
@@ -40,13 +40,13 @@ function sessionUpdateStatus() {
 }
 
 
-function sessionLogin() {
-    const name = document.getElementById('sessionLoginId').value;
+function _sessionSignin() {
+    const login = document.getElementById('sessionLoginId').value;
     const password = document.getElementById('sessionPasswordId').value;
 
     fetch(`${baseUrl}/auth/`, {
         method: 'POST',
-        body: JSON.stringify({ name: name, password: password })
+        body: JSON.stringify({ login: login, password: password })
     }).then(response => {
         if (!response.ok) {
             response.text().then(text => displayError(text)).catch(err => displayError(err));
@@ -55,9 +55,9 @@ function sessionLogin() {
     }).catch(err => displayError(err));
 }
 
-function sessionLogout() {
-    fetch(`${baseUrl}/auth/?logout=true`, {
-        method: 'POST'
+function _sessionSignout() {
+    fetch(`${baseUrl}/auth/`, {
+        method: 'DELETE'
     }).then(response => {
         if (!response.ok) {
             response.text().then(text => displayError(text)).catch(err => displayError(err));

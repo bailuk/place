@@ -25,10 +25,10 @@ function exitError(Exception $e) {
 
 
 function getSessionStatus() {
-    if (isset($_SESSION['auth']) && isset($_SESSION['admin']) && isset($_SESSION['name'])) {
-        $result = array('name' => $_SESSION['name'], 'auth' => $_SESSION['auth'], 'admin' => $_SESSION['admin']);
+    if (isset($_SESSION['auth']) && isset($_SESSION['admin']) && isset($_SESSION['login'])) {
+        $result = array('login' => $_SESSION['login'], 'auth' => $_SESSION['auth'], 'admin' => $_SESSION['admin']);
     } else {
-        $result = array('name' => "", 'auth' => false, 'admin' => false);
+        $result = array('login' => "", 'auth' => false, 'admin' => false);
     }
     return $result;
 

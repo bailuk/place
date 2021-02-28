@@ -49,7 +49,6 @@
 
 
         function startSession(status) {
-            console.log(status);
             if (status.auth && status.admin) {
                 studentEditId = -1;
             } else {
@@ -137,8 +136,6 @@
             let name = document.querySelector('.newName').value;
             let marker = getSaveMarker(document.querySelector('input[name="marker"]:checked').value);
 
-            console.log(marker);
-
             fetch(`${baseUrl}/student/`, {
                 method: 'POST',
                 body: JSON.stringify({ name: name, id_city: citySelectedId, marker: marker })
@@ -176,7 +173,6 @@
 
 
         function deleteStudent(id) {
-            console.log(id);
             response = fetch(`${baseUrl}/student/?id=${id}`, { method: 'DELETE' })
                 .then(response => {
                     if (!response.ok) {

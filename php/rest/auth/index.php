@@ -16,6 +16,29 @@ function isAdmin($role) {
 }
 
 
+function signoutOnRequest() {
+    if (isset($_GET['signout'])) {
+        signout();
+        return true;
+    }
+    return false;
+}
+
+
+function signout() {
+    $_SESSION['auth'] = false;
+    $_SESSION['admin'] = false;
+}
+
+function authenticate($user, $input) {
+    if ($user['login'] == $input['login'] && password_verify($input['password'], $user['password'])) {
+        $_SESSION['login'] = $input['login'];
+        $_SESSION['admin'] = isAdmin($user['role']);
+        $_SESSION['auth'] = true;
+    }
+}
+
+
 try {
 
     session_start();
@@ -23,42 +46,26 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
     $entity = new Entity(connect(), 'user');
 
-    if ($method == 'GET') {
-        if (isset($_GET['logout'])) {
-            $_SESSION['auth'] = false;
-        }
+    if ($method == 'DELETE') {
+        signout();
+
+    } else if ($method == 'GET') {
+        signoutOnRequest();
         echoSessionStatus();
 
     } else if ($method == 'POST' or $method == 'PUT') {
         
+        $_SESSION['auth'] = false;
 
-        if (isset($_GET['logout'])) {
-            $_SESSION['auth'] = false;
-            echoSessionStatus();
-    
-            
-        } else {
-
-            $_SESSION['auth'] = false;
-
-            $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-            $login = $input['name'];
-            $password = $input['password'];
-            
-
-            $userList = $entity->fetch("*", "WHERE login = ?", array($login));
-            foreach( $userList as $user) {
-                if ($user['login'] == $login && password_verify($password, $user['password'])) {
-                    $_SESSION['name'] = $login;
-                    $_SESSION['admin'] = isAdmin($user['role']);
-                    $_SESSION['auth'] = true;
-                    break;
-                }
-            }
-
-            throwOnFailedLogin();
-            echoSessionStatus();
+        $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+        $users = $entity->fetch("*", "WHERE login = ?", array($input['login']));
+        foreach( $users as $user) {
+            authenticate($user, $input);
+            break;
         }
+
+        throwOnFailedLogin();
+        echoSessionStatus();
     }
 } catch (Exception $e) {
     exitError($e);
