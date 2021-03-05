@@ -222,8 +222,6 @@
             let html = '<table>';
 
             students.forEach(student => {
-                hans = student.name;
-
                 if (student.id == studentEditId) {
 
                     citySelectedId = student.id_city;
@@ -236,7 +234,7 @@
                                 <td id="cityNameId">${student.city}</td>
                                 <td>${markerHtml}</td> 
 
-                                <td><input type="button" value="Update Student" onclick="updateStudent(`+ student.id + `)"></td>
+                                <td><input type="button" value="Update Student" onclick="updateStudent(${student.id})"></td>
                                 <td><input type="button" value="Cancel" onclick="cancelUpdateStudent()"></td>
                                 </tr></form>`;
 
@@ -248,8 +246,8 @@
                     let htmlEdit = '';
 
                     if (studentEditId > -2) {
-                        htmlEdit = `<td><button onClick="deleteStudent(` + student.id + `)">remove</button></td>
-                                        <td><button onClick="editStudent(`+ student.id + `)">edit</button></td>`;
+                        htmlEdit = `<td><button onClick="deleteStudent(${student.id})">remove</button></td>
+                                        <td><button onClick="editStudent(${student.id})">edit</button></td>`;
 
                     }
 
