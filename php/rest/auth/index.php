@@ -11,9 +11,7 @@ function echoSessionStatus() {
     echo json_encode($result);
 }
 
-function isAdmin($role) {
-    return $role == 1;
-}
+
 
 
 function signoutOnRequest() {

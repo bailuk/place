@@ -56,3 +56,15 @@ function throwOnNonAdminSession() {
         throw new \Exception('Session is not valid or missing permission');
     }
 }
+
+function getUserRole() {
+    return 0;
+}
+
+function getAdminRole() {
+    return 1;
+}
+function isAdmin($role) {
+    return $role == getAdminRole();
+}
+
