@@ -26,7 +26,9 @@ function signoutOnRequest() {
 function signout() {
     $_SESSION['auth'] = false;
     $_SESSION['admin'] = false;
+    session_destroy();
 }
+
 
 function authenticate($user, $input) {
     if ($user['login'] == $input['login'] && password_verify($input['password'], $user['password'])) {

@@ -51,10 +51,16 @@ try {
     } else if ($method == 'POST') {
         // add non-admin user
 
+
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
         $password = password_hash($input['password'], PASSWORD_DEFAULT);
-        $entity->create(array('login' => $input['login'], 'password' => $password, 'role' => getUserRole()));
-        header('HTTP/1.1 201 Created');
+
+        if (strlen($input['login']) > 2 && str_contains($input['login'], '@')) {
+            $entity->create(array('login' => $input['login'], 'password' => $password, 'role' => getUserRole()));
+            header('HTTP/1.1 201 Created');
+        } else {
+            throw new \Exception('Invalid login name');
+        }
 
 
     } else if ($method == 'PUT') {

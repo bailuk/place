@@ -59,15 +59,59 @@
         }
 
 
+        function validatePassword() {
+            passwordOk = false;
+
+            validate = document.getElementById('validatePasswordId');
+            password = document.getElementById('add_password').value;
+
+            if(password.length==0){
+                validate.innerHTML = "";
+                return;
+            }
+
+            var passwordStrength = '';
+
+            if (password.length == 0) {
+                passwordOk = false;
+            } else if (password.length < 8) {
+                passwordOk = false;
+                passwordStrength = "Password is too short, it must have at least 8 characters";
+            } else {
+                passwordStrength = "Password length is ok";
+                passwordOk = true;
+            }
+            validate.innerHTML = passwordStrength;
+            return passwordOk;
+        }
+
+
+        function validateLogin() {
+            validate = document.getElementById('validateLoginId');
+            login = document.getElementById('add_login').value;
+
+            if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(login)) {
+                validate.innerHTML='login name is ok';    
+                return true;
+            } 
+            
+            validate.innerHTML='login name must be an e-mail address';
+            return false;
+        }
+
+
         function displayAddForm() {
 
             if (userEditId == -1) {
 
                 html = `
                     <label for="add_login">login</label>
-                    <input type="text" name="login" id="add_login">
+                    <input type="text" name="login" id="add_login" onkeyup="validateLogin()"">
+                    <div id="validateLoginId"></div>                    
+
                     <label for="add_password">password</label>
-                    <input type="password" name="password" id="add_password">
+                    <input type="password" name="password" id="add_password" onkeyup="validatePassword()">
+                    <div id="validatePasswordId"></div>
                     <button onclick="addUser()">add</button>
                     `;
 
@@ -79,8 +123,13 @@
 
 
         function addUser() {
+            if (!validateLogin() || !validatePassword()) {
+                return;
+            }
+
             let login = document.getElementById('add_login').value;
             let password = document.getElementById('add_password').value;
+
 
             console.log(login);
             console.log(password);
@@ -104,7 +153,10 @@
         }
 
         function updateUser(id) {
-            let password = document.getElementById('update_password').value;
+            let password = document.getElementById('add_password').value;
+            if (!validatePassword()) {
+                return;
+            }
 
             fetch(`${baseUrl}/user/?id=${id}`, {
                 method: 'PUT',
@@ -150,7 +202,8 @@
 
                     html += `<form action="">
                                 <tr>
-                                <td>New password for ${user.login}: <input type="text" name="password" id="update_password"></td>
+                                <td>New password for ${user.login}: <input type="password" name="password" id="add_password" onkeyup="validatePassword()"></td>
+                                <td><div id="validatePasswordId"></div></td>
                                 <td><input type="button" value="Set password" onclick="updateUser(${user.id})"></td>
                                 <td><input type="button" value="Cancel" onclick="cancelUpdateUser()"></td>
                                 </tr></form>`;
