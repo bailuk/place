@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Happy Place</title>
+</head>
+
+<body>
+
+    <div id="errorId"></div>
+
+
+    <ul id="navigateId">
+        <li><a href="../../">map</a></li>
+        <li><a href="../list">list</a></li>
+    </ul>
+
+    <div id="sessionStatusId"></div>
+
+    <h2>users</h2>
+    <div id="userListId"></div>
+
+    <h2>add user</h2>
+    <div id="userAddId"></div>
+
+
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/util.js"></script>
+    <script src="../js/session.js"></script>
+
+    <script>
+
+        initSession('sessionStatusId', startSession);
+
+
+        let userEditId = -1;
+
+        function startSession(status) {
+            if (status.auth && status.admin) {
+                userEditId = -1;
+                loadUsers();
+                displayAddForm();
+
+            } else {
+                let info = '<p>not logged in as admin</p>';
+
+                document.getElementById('userAddId').innerHTML = info;
+                document.getElementById('userListId').innerHTML = info;
+
+            }
+        }
+
+
+        function displayAddForm() {
+
+            if (userEditId == -1) {
+
+                html = `
+                    <label for="add_login">login</label>
+                    <input type="text" name="login" id="add_login">
+                    <label for="add_password">password</label>
+                    <input type="password" name="password" id="add_password">
+                    <button onclick="addUser()">add</button>
+                    `;
+
+            } else {
+                html = '<p>[updating user...]</p>';
+            }
+            document.getElementById('userAddId').innerHTML = html;
+        }
+
+
+        function addUser() {
+            let login = document.getElementById('add_login').value;
+            let password = document.getElementById('add_password').value;
+
+            console.log(login);
+            console.log(password);
+
+            fetch(`${baseUrl}/user/`, {
+                method: 'POST',
+                body: JSON.stringify({ login: login, password: password })
+
+            }).then(response => {
+                if (!response.ok) {
+                    response.text().then(text => displayError(text));
+                }
+
+                loadUsers();
+                displayAddForm();
+            }).catch(err => displayError(err));;
+        }
+
+        function cancelUpdateUser() {
+            initSession('sessionStatusId', startSession);
+        }
+
+        function updateUser(id) {
+            let password = document.getElementById('update_password').value;
+
+            fetch(`${baseUrl}/user/?id=${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ password: password })
+            }).then(response => {
+                if (!response.ok) {
+                    response.text().then(text => displayError(text));
+                }
+
+                initSession('sessionStatusId', startSession);
+            }).catch(err => displayError(err));;
+
+        }
+
+
+        function deleteUser(id) {
+            response = fetch(`${baseUrl}/user/?id=${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (!response.ok) {
+                        response.text().then(text => displayError(text));
+                    }
+
+                    initSession('sessionStatusId', startSession);
+
+                }).catch(err => displayError(err));;
+        }
+
+
+        function editUser(id) {
+            userEditId = id;
+            loadUsers();
+            displayAddForm();
+        }
+
+
+        function _loadUsers(users) {
+            const userList = document.getElementById('userListId');
+
+            let html = '<table>';
+
+            users.forEach(user => {
+                if (user.id == userEditId) {
+
+                    html += `<form action="">
+                                <tr>
+                                <td>New password for ${user.login}: <input type="text" name="password" id="update_password"></td>
+                                <td><input type="button" value="Set password" onclick="updateUser(${user.id})"></td>
+                                <td><input type="button" value="Cancel" onclick="cancelUpdateUser()"></td>
+                                </tr></form>`;
+
+                } else {
+
+                    let htmlEdit = '';
+
+                    if (userEditId > -2) {
+                        htmlEdit = `<td><button onClick="deleteUser(${user.id})">remove</button></td>
+                                    <td><button onClick="editUser(${user.id})">edit</button></td>`;
+
+                    }
+
+                    let role = '';
+
+                    if (user.role == 1) {
+                        role = 'admin';
+                    } else {
+                        role = 'user';
+                    }
+
+                    html += `<tr>
+                                <td>${user.login}</td>
+                                <td>${role}</td>
+                                ${htmlEdit}
+                            </tr>`;
+                }
+
+            });
+            html += "</table>";
+            userList.innerHTML = html;
+
+        }
+
+        function loadUsers() {
+            fetch(`${baseUrl}/user/`)
+                .then(response => {
+                    if (response.ok) {
+                        response.json().then(json => _loadUsers(json)).catch(err => displayError(err));
+                    } else {
+                        document.getElementById('userListId').innerHTML = '';
+                        response.text().then(text => displayError(text)).catch(err => displayError(err));
+                    }
+
+                }).catch(err => displayError(err));
+        }
+
+
+    </script>
+
+</body>
+
+</html>
