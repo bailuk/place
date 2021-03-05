@@ -64,12 +64,12 @@ try {
 
 
     } else if ($method == 'PUT') {
-        // update password of non-admin user
+        // update password of user
         
         if (isset($_GET['id'])) {
             $what = "id, role";
-            $where = "WHERE id = ? AND role = ?";
-            $result = $entity->fetch($what, $where, array($_GET['id'], getUserRole()));
+            $where = "WHERE id = ?";
+            $result = $entity->fetch($what, $where, array($_GET['id']));
             
             if (count($result) == 1) {
                 $input = (array) json_decode(file_get_contents('php://input'), TRUE);

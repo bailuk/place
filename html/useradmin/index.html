@@ -60,25 +60,20 @@
 
 
         function validatePassword() {
-            passwordOk = false;
+            let passwordOk = false;
+            let validate = document.getElementById('validatePasswordId');
+            let password = document.getElementById('add_password').value;
 
-            validate = document.getElementById('validatePasswordId');
-            password = document.getElementById('add_password').value;
-
-            if(password.length==0){
-                validate.innerHTML = "";
-                return;
-            }
-
-            var passwordStrength = '';
+            let passwordStrength = '';
 
             if (password.length == 0) {
                 passwordOk = false;
+                passwordStrength = "no password entered";
             } else if (password.length < 8) {
                 passwordOk = false;
-                passwordStrength = "Password is too short, it must have at least 8 characters";
+                passwordStrength = "password is too short, it must have at least 8 characters";
             } else {
-                passwordStrength = "Password length is ok";
+                passwordStrength = "password length is ok";
                 passwordOk = true;
             }
             validate.innerHTML = passwordStrength;
@@ -123,7 +118,10 @@
 
 
         function addUser() {
-            if (!validateLogin() || !validatePassword()) {
+            lv = validateLogin();
+            pv = validatePassword();
+
+            if (!lv || !pv) {
                 return;
             }
 
