@@ -67,11 +67,7 @@ try {
             
             if (count($result) == 1) {
                 $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-
-                
-                $entity->update($_GET['id'], array('password' => password_hash($input['password'])));
-                throw new \Exception("f");
-
+                $entity->update($_GET['id'], array('password' => password_hash($input['password'], PASSWORD_DEFAULT)));
                         
             } else {
                 throw new \Exception("Could not update password for user with id $_GET[id]");
