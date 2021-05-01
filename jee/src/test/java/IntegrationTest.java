@@ -12,20 +12,26 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import service.HelloWorldService;
+import rest.HelloResource;
+import service.HelloService;
 
 @RunWith(Arquillian.class)
 public class IntegrationTest {
     
 
     @Inject
-    HelloWorldService helloWorldService;
+    HelloService helloService;
+
+    @Inject
+    HelloResource helloResource;
 
 
     @Deployment
     @TargetsContainer("wildfly-remote-test2")
     public static Archive<?> createDeployment() {
-        return ShrinkWrap.create(WebArchive.class).addClass(HelloWorldService.class);
+        return ShrinkWrap.create(WebArchive.class)
+            .addClass(HelloService.class)
+            .addClass(HelloResource.class);
     }
 
 
@@ -36,7 +42,13 @@ public class IntegrationTest {
 
     @Test
     public void testInjection() {
-        assertNotNull(helloWorldService);
-        assertEquals("Hello World!", helloWorldService.sayHelloWorld());
+        assertNotNull(helloService);
+        assertEquals("Hello World!", helloService.sayHello("World"));
+    }
+
+    @Test
+    public void testResources() {
+        assertNotNull(helloResource);
+        assertEquals("Hello World!", helloResource.sayHello("World"));
     }
 }
