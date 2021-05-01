@@ -15,14 +15,16 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import rest.HelloResource;
+import service.DbService;
 import service.HelloService;
 
 
@@ -37,6 +39,9 @@ public class IntegrationTest {
     @Inject
     HelloResource helloResource;
 
+    @Inject
+    DbService dbService;
+
 
     @Deployment
     @TargetsContainer("wildfly-remote-test2")
@@ -45,7 +50,10 @@ public class IntegrationTest {
             .addClasses(
                 HelloService.class, 
                 HelloResource.class, 
-                PlaceApplication.class);
+                PlaceApplication.class,
+                DbService.class)
+            .addAsResource(new File("src/main/resources/META-INF/persistence.xml"),"META-INF/persistence.xml");
+                                    
     }
 
 
@@ -80,5 +88,11 @@ public class IntegrationTest {
         InputStream is = url.openStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         assertEquals("Hello World!", br.readLine());
+    }
+
+    @Test
+    public void testDbService() {
+        assertNotNull(dbService);
+        assertNotNull(dbService.getEm());
     }
 }
