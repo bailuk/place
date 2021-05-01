@@ -1,10 +1,14 @@
 target
 
-# eclipse
+# Eclipse
 .classpath
 .metadata
 .project
 .settings
+
+
+# Visual Code
+.vscode
 
 # vi
 *.swp
