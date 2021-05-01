@@ -16,13 +16,13 @@ function _sessionUpdateStatus(status) {
     const statusElement = document.getElementById(sessionElementId);
         
     if (status.auth) {
-        statusElement.innerHTML = `<div>signed in as ${status.login} <button onclick="_sessionSignout()">sign out</button></div>`;
+        statusElement.innerHTML = `<div>signed in as ${status.login} <button class="btn btn-warning" onclick="_sessionSignout()">sign out</button></div>`;
     } else {
         statusElement.innerHTML = 
             `<div>
                 <label for="sessionLoginId">login</label><input type="text" id="sessionLoginId">
                 <label for="sessionPasswordId">passwort</label><input type="password" id="sessionPasswordId">
-                <button onclick="_sessionSignin()">sign in</button>
+                <button class="btn btn-success" onclick="_sessionSignin()">sign in</button>
             </div>`;
     }
     sessionStartSession(status);

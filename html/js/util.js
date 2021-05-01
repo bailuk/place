@@ -14,7 +14,7 @@ function displayError(err) {
     let html = document.getElementById('errorId').innerHTML;
 
     if (html == '') {
-        html = `<button onclick="clearErrors()">clear</button>`;
+        html = `<button class="btn btn-light" onclick="clearErrors()">clear</button>`;
     }
 
     const time = getFormattedTime();

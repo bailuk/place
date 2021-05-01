@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Happy Place</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 </head>
 
 <body>
 
-    <div id="errorId"></div>
-
+    <div class="alert alert-primary" id="errorId"></div>
 
     <ul id="navigateId">
         <li><a href="../../">map</a></li>
@@ -107,7 +107,7 @@
                     <label for="add_password">password</label>
                     <input type="password" name="password" id="add_password" onkeyup="validatePassword()">
                     <div id="validatePasswordId"></div>
-                    <button onclick="addUser()">add</button>
+                    <button class="btn btn-primary" onclick="addUser()">add</button>
                     `;
 
             } else {
@@ -193,7 +193,7 @@
         function _loadUsers(users) {
             const userList = document.getElementById('userListId');
 
-            let html = '<table>';
+            let html = '<table class="table">';
 
             users.forEach(user => {
                 if (user.id == userEditId) {
@@ -202,8 +202,8 @@
                                 <tr>
                                 <td>New password for ${user.login}: <input type="password" name="password" id="add_password" onkeyup="validatePassword()"></td>
                                 <td><div id="validatePasswordId"></div></td>
-                                <td><input type="button" value="Set password" onclick="updateUser(${user.id})"></td>
-                                <td><input type="button" value="Cancel" onclick="cancelUpdateUser()"></td>
+                                <td><button class="btn btn-secondary" onclick="updateUser(${user.id})">set password</button></td>
+                                <td><button class="btn btn-secondary" onclick="cancelUpdateUser()">cancel</button></td>
                                 </tr></form>`;
 
                 } else {
@@ -211,8 +211,8 @@
                     let htmlEdit = '';
 
                     if (userEditId > -2) {
-                        htmlEdit = `<td><button onClick="deleteUser(${user.id})">remove</button></td>
-                                    <td><button onClick="editUser(${user.id})">edit</button></td>`;
+                        htmlEdit = `<td><button class="btn btn-danger" onClick="deleteUser(${user.id})">remove</button></td>
+                                    <td><button class="btn btn-secondary" onClick="editUser(${user.id})">edit</button></td>`;
 
                     }
 
