@@ -26,6 +26,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <version.wildfly.plugin>2.1.0.Beta1</version.wildfly.plugin>
         <version.surefire.plugin>3.0.0-M5</version.surefire.plugin>
 
+        <!-- org.glassfish JSON Processing -->
+        <version.json>1.1.4</version.json>
+
         <!-- WildFly -->
         <version.org.wildfly>22.0.0.Final</version.org.wildfly>
         <wildfly.port>9991</wildfly.port>
@@ -80,12 +83,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <scope>provided</scope>
         </dependency>
 
-
-       <dependency>
+        <!-- Default provider for JSR 374:Java API for Processing JSON  -->
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.1.4</version>
+            <version>${version.json}</version>
         </dependency>
+       
 
         <!-- JUnit is a unit testing framework for Java -->
         <dependency> 
